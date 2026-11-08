@@ -34,6 +34,11 @@ Record app version, source commit, backup location, and restore procedure;
 verify the backup and rehearse restore in isolation. A running SQLite database
 cannot safely be backed up by copying just its main file. Protect backup files
 as sensitive: they may contain credentials, conversations, and personal data.
+Include the desktop application's support data where needed, and inventory
+keychain entries, external provider accounts, remote computers and workspaces.
+These may not be captured by a file copy or the application's export; verify
+their availability separately and do not promise a complete rollback until
+the relevant dependencies have been exercised.
 
 Check migration and downgrade compatibility before opening live data with a
 newer build. A rollback may require restoring the matching data snapshot; that
