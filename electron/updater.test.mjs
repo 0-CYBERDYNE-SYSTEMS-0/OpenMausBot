@@ -16,7 +16,9 @@ const CLOUD = "https://home-7f3k2.fly.dev";
 const OTHER = "https://bots.example.test";
 const OWN = "https://omb-c-a.fly.dev";
 
-const fixture = vi.hoisted(() => ({ autoUpdater: null, handlers: new Map() }));
+const fixture = vi.hoisted(() => ({ autoUpdater: null, handlers: new Map(), autonomyBuild: false }));
+
+vi.mock("./autonomy-build.mjs", () => ({ forkBuildMarker: () => fixture.autonomyBuild }));
 
 vi.mock("electron", () => ({
   app: { isPackaged: true, getPath: () => "/unused-updater-test-log", getVersion: () => "1.0.0", hide: vi.fn() },
@@ -120,6 +122,7 @@ const settle = async () => {
 };
 
 beforeEach(() => {
+  fixture.autonomyBuild = false;
   localOriginModule.setLocalOrigin(LOCAL);
   vi.useFakeTimers();
 });
@@ -420,4 +423,25 @@ it("sends updater progress to a reopened window without restarting the updater",
     .toEqual(["checking", "downloading", "downloading", ...(process.platform === "darwin" ? ["preparing"] : []), "downloaded"]);
   expect(autoUpdater.eventNames().reduce((count, name) => count + autoUpdater.listenerCount(name), 0)).toBe(listenerCount);
   expect(vi.getTimerCount()).toBe(timerCount);
+});
+
+it("never checks or installs official updates in the autonomy build", async () => {
+  fixture.autonomyBuild = true;
+  const { updater, autoUpdater, handlers } = await load(() => true);
+  updater.startUpdater();
+  await handlers.get("update:check")({});
+  await handlers.get("update:install")({});
+  await vi.advanceTimersByTimeAsync(3_600_000);
+  expect(autoUpdater.checkForUpdates).not.toHaveBeenCalled();
+  expect(autoUpdater.downloadUpdate).not.toHaveBeenCalled();
+  expect(autoUpdater.quitAndInstall).not.toHaveBeenCalled();
+});
+
+it("does not start an updater if packaged metadata cannot be read", async () => {
+  fixture.autonomyBuild = null;
+  const { updater, autoUpdater, handlers } = await load(() => true);
+  updater.startUpdater();
+  await handlers.get("update:check")({});
+  await vi.advanceTimersByTimeAsync(3_600_000);
+  expect(autoUpdater.checkForUpdates).not.toHaveBeenCalled();
 });

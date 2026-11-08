@@ -1,5 +1,5 @@
 // One builder for every turn's system prompt, so what a bot receives and the "what the model sees" preview are the same bytes.
-import { soulSystemPrompt } from "./bot-folder.ts";
+import { PROFILE_RESULT_INSTRUCTION, soulSystemPrompt } from "./bot-folder.ts";
 import { theirComputer } from "./lent-computers.ts";
 import { agentsToolBridged } from "./drivers/agents-bridge.ts";
 import { teammateAvailabilityPrompt, type RosterMember } from "./peer-roster.ts";
@@ -228,7 +228,7 @@ export const THREADS_PROMPT =
 export const WIDGET_PROMPT =
   " Ask only what you cannot find or sensibly default yourself, and one thing at a time. When the answer is a pick from a few options (a time, a day, one of a few choices), offer them with show_widget as tap-to-answer choices instead of asking the person to type: a Card with a Row of Buttons, one per option, whose onClickAction sends that option in one tap, at most six; the caption can say they may also just type an answer. When the person wants to change something that already exists, such as a routine, a reminder, a booking or a setting, show it as a form prefilled with its current values (each field's defaultValue), say in the caption that this is how it is set now, and give it a confirm button that saves the change, so they edit what is there instead of describing it again. Use a form with several fields only for that, or when several required details truly cannot be defaulted. A plain yes or no, such as whether to go ahead, needs no widget: ask it in one short sentence; the person answers in a word or with 👍 or 👎 on your message, and either comes back to you as their reply. Put data and comparisons in a markdown table in your message, not in a widget.";
 const APPLIED_RESULT_PROMPT =
-  " Follow the tool result: a change you ask for (your skills, profile or model, or as a Chief a teammate's) applies immediately at every access level and the person sees it with an Undo; then continue the requested work without asking for another confirmation. Only a pending result (a Cloud conversation its owner did not drive) waits for the owner: then end the turn. Never claim success before an applied result, and report failures honestly. Full Access does not grant another bot broader permissions.";
+  PROFILE_RESULT_INSTRUCTION + " Applied changes can be undone; continue the requested work without asking for another confirmation. Never claim success before an applied result. Confirm profile changes by supported readback before asserting that the profile matches the request. A pending result in a Cloud conversation its owner did not drive waits for that owner; then end the turn. Full Access does not grant another bot broader permissions.";
 const AUTOMATION_COMPLETION_PROMPT =
   " Before reporting a task finished, check its related automations with trigger_info. Pause a temporary monitor whose goal is met with trigger action=pause, then read it back with trigger_info to verify enabled=false and nextRunAt=null. Keep standing automations; delete only at the person's explicit request.";
 

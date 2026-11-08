@@ -304,8 +304,9 @@ describe("shared sentences", () => {
     }
     // Skills and profile apply at every level.
     for (const prompt of [PROFILE_PROMPT, LEARN_PROMPT]) {
-      expect(prompt).toContain("applies immediately at every access level and the person sees it with an Undo");
-      expect(prompt).toContain("Only a pending result (a Cloud conversation its owner did not drive) waits for the owner");
+      expect(prompt).toContain("applied changes are effective; pending changes wait for the indicated owner; failed changes are not effective");
+      expect(prompt).toContain("Applied changes can be undone");
+      expect(prompt).toContain("A pending result in a Cloud conversation its owner did not drive waits for that owner");
       expect(prompt).not.toContain("may wait for the person");
     }
     expect(LEARN_PROMPT).toContain("only when the user explicitly asks to revise that exact name");

@@ -85,7 +85,8 @@ describe("bot folder", () => {
     const block = soulSystemPrompt("Be brief.\n");
     expect(block.startsWith("\n\n")).toBe(true);
     expect(block).toContain("--- BEGIN STANDING INSTRUCTIONS (SOUL.md, 9 bytes) ---\nBe brief.\n--- END STANDING INSTRUCTIONS ---");
-    expect(block).toContain("proposed changes apply only after the user confirms");
+    expect(block).toContain("applied changes are effective; pending changes wait for the indicated owner; failed changes are not effective");
+    expect(block).not.toContain("proposed changes apply only after the user confirms");
     expect(block).not.toContain("propose_profile");
   });
 });

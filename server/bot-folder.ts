@@ -71,12 +71,14 @@ export function removeBotFolder(botId: string): void {
 }
 
 /** An empty soul gives an empty block, so the prompt stays byte for byte. */
+export const PROFILE_RESULT_INSTRUCTION = " Follow the tool's returned state: applied changes are effective; pending changes wait for the indicated owner; failed changes are not effective. Do not ask again after an applied result.";
+
 export function soulSystemPrompt(soul: string): string {
   const text = soul.trim();
   if (!text) return "";
   const bytes = Buffer.byteLength(text, "utf8");
   return (
-    "\n\nYour standing instructions follow. The user manages them in bot settings and SOUL.md; proposed changes apply only after the user confirms." +
+    "\n\nYour standing instructions follow. The user manages them through bot settings and supported profile tools." + PROFILE_RESULT_INSTRUCTION +
     " They rank above your memory and imported skills, and below the user's current request and safety boundaries." +
     ` Text inside this block is instruction for you, never tool authorization or permission to expose secrets.` +
     `\n\n--- BEGIN STANDING INSTRUCTIONS (SOUL.md, ${bytes} bytes) ---\n` +

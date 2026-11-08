@@ -1,6 +1,7 @@
 // macOS auto-update requires a signed app, so this runs only when packaged. electron-updater is vendored
 // because the packaged app ships no node_modules.
 import { app, clipboard, ipcMain } from "electron";
+import { forkBuildMarker } from "./autonomy-build.mjs";
 import { appendFileSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
@@ -148,7 +149,7 @@ export function attachUpdaterWindow(mainWindow) {
 
 /** `signals` (quietSignals): what tells a quiet moment; without them a downloaded update installs only on Restart or quit. */
 export function startUpdater(signals = null) {
-  if (!app.isPackaged) {
+  if (!app.isPackaged || forkBuildMarker(app) !== false) {
     updaterCoordinator = null;
     setState({ status: "idle" });
     return;

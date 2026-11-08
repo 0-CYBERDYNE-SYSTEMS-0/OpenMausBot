@@ -2,6 +2,7 @@
 import { randomUUID } from "node:crypto";
 
 import { composeEnvelope } from "./envelope.ts";
+import { RESULT_TRUNCATED } from "./result-truncation.ts";
 import { assignmentLevel } from "./level.ts";
 import type { RuntimeStore } from "./store.ts";
 import { answersSender, asking, awaited, childrenSince, settledSince, clip, continuations, CUT_TWICE, duration, isTerminal, loopStop, nextGuard, outwardDetail, ownsConversation, ownThread, path, restartNote, wakeOwner } from "./tree.ts";
@@ -36,6 +37,8 @@ export interface BeginRequest {
 
 const BRIEF_MAX = 12_000;
 const RESULT_MAX = 12_000;
+const boundedResult = (text: string): string => text.length > RESULT_MAX
+  ? text.slice(0, RESULT_MAX - RESULT_TRUNCATED.length - 2) + "\n\n" + RESULT_TRUNCATED : text;
 const STOPPED_WITH_REQUEST = "Stopped with the request it was for";
 const DETAIL_MAX = 400;
 
@@ -462,7 +465,7 @@ export class Runtime {
     const root = n.parentId ? this.store.get(n.rootId) : n;
     if (result.kind === "continue") {
       // The count comes from events because dispatch deletes n.continuation.
-      n.result = clip(result.text, RESULT_MAX);
+      n.result = boundedResult(result.text);
       n.guard = nextGuard(n.guard, result.evidence);
       const stop = loopStop(n.guard, result.text);
       if (stop) {
@@ -495,7 +498,7 @@ export class Runtime {
       }
       return;
     }
-    n.result = clip(result.text, RESULT_MAX);
+    n.result = boundedResult(result.text);
     if (result.kind === "completed" && result.statusOnly) n.statusOnly = true;
     const kids = awaited(this.store.children(n.id));
     const unseen = live !== undefined && kids.some(c => isTerminal(c) && !live.carried.has(c.id));

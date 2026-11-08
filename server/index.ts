@@ -646,6 +646,7 @@ import { createWebhookRoutes } from "./routes/webhooks.ts";
 import { withScopeHint } from "./connector-scope-hint.ts";
 import { connectorRequestItems } from "./connector-request-items.ts";
 import { onThreadSeen, personAsks as personAskAt, sawThread } from "./thread-presence.ts"; import { createWarmSummaryHost, HARNESS_IDLE_FRACTION } from "./host/warm-summary-host.ts";
+import { teammateResultOutput } from "./host/teammate-result-output.ts";
 
 const PORT = Number(process.env.OMB_PORT || process.env.OGB_PORT || 8799);
 const WEBHOOK_PORT = Number(process.env.OMB_WEBHOOK_PORT || PORT + 1);
@@ -3979,7 +3980,7 @@ const handoffTicks = createHandoffTicks(), coordinator: Coordinator = createCoor
           name: teammateResultRow(threadLanguage(parent.threadId), child, ownThreads.name(parent, child) ?? bot?.name, problem, child.groupId ? store.group(child.groupId)?.name : undefined),
           ok: child.status === "completed" && !problem,
           ...(child.status === "completed" && !problem && child.result.trim()
-            ? { output: redactSecretsInText(child.result.trim()).slice(0, 2_000) } : {}),
+            ? { output: teammateResultOutput(redactSecretsInText(child.result)) } : {}),
         },
         ...(child.groupId ? { comm: { groupId: child.groupId, threadId: child.threadId, withBotId: child.botId,
           withName: bot?.name ?? "Teammate", withColor: bot?.color ?? "blue" } }

@@ -89,6 +89,20 @@ type EnqueueResult = ReturnType<Runtime["enqueue"]>;
 const invariants = (w: World) => expect(checkInvariants(w.store, w.runner.live())).toEqual([]);
 
 describe("Runtime: one tree, one lane", () => {
+  it("marks an oversized assignment result as partial instead of silently clipping it", async () => {
+    const w = world(() => ({ kind: "completed", text: "x".repeat(13_000) }));
+    const root = w.runtime.begin(beginReq());
+    const child = ok(w.runtime.enqueue(toBot("researcher", root.id)));
+    w.runtime.end(root.id, { ok: true, text: "waiting" });
+    w.runtime.tick();
+    await flush();
+    const result = w.store.get(child.id)?.result;
+    expect(result?.length).toBeLessThanOrEqual(12_000);
+    expect(result).toContain("Partial result: the assignment response exceeded the transport limit");
+    expect(result).toContain("omitted content was not retained");
+    w.runtime.close();
+    w.store.close();
+  });
   it("runs a child, reports it once, then wakes the root with the settled children in one resume turn", async () => {
     const w = world();
     const root = w.runtime.begin(beginReq());
