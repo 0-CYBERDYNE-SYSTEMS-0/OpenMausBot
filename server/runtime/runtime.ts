@@ -1,6 +1,8 @@
 // The store is the only state: tick() is the only place work is admitted or dispatched, and no timer lives here.
 import { randomUUID } from "node:crypto";
 
+import { toolResultPrefix } from "../tool-results.ts";
+
 import { composeEnvelope } from "./envelope.ts";
 import { RESULT_TRUNCATED } from "./result-truncation.ts";
 import { assignmentLevel } from "./level.ts";
@@ -38,7 +40,7 @@ export interface BeginRequest {
 const BRIEF_MAX = 12_000;
 const RESULT_MAX = 12_000;
 const boundedResult = (text: string): string => text.length > RESULT_MAX
-  ? text.slice(0, RESULT_MAX - RESULT_TRUNCATED.length - 2) + "\n\n" + RESULT_TRUNCATED : text;
+  ? toolResultPrefix(text, RESULT_MAX - RESULT_TRUNCATED.length - 2) + "\n\n" + RESULT_TRUNCATED : text;
 const STOPPED_WITH_REQUEST = "Stopped with the request it was for";
 const DETAIL_MAX = 400;
 

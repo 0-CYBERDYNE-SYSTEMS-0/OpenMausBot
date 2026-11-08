@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { checkInvariants } from "./invariants.ts";
 import { Runtime, type BeginRequest } from "./runtime.ts";
+import { RESULT_TRUNCATED } from "./result-truncation.ts";
 import { openRuntimeStore, type RuntimeStore } from "./store.ts";
 import { CUT_TWICE, INTERRUPTED_OUTWARD, loopStop, nextGuard, outwardDetail } from "./tree.ts";
 import type { Assignment, Clock, EnqueueRequest, Limits, RunInput, RunResult, TurnRunner } from "./types.ts";
@@ -102,6 +103,18 @@ describe("Runtime: one tree, one lane", () => {
     expect(result).toContain("omitted content was not retained");
     w.runtime.close();
     w.store.close();
+  });
+  it("keeps a full Unicode character at the result truncation boundary", async () => {
+    const prefixLength = 12_000 - RESULT_TRUNCATED.length - 2;
+    const text = "x".repeat(prefixLength - 1) + "🌱" + "y".repeat(12_000);
+    const w = world(() => ({ kind: "completed", text }));
+    const root = w.runtime.begin(beginReq());
+    const child = ok(w.runtime.enqueue(toBot("researcher", root.id)));
+    w.runtime.end(root.id, { ok: true, text: "waiting" });
+    w.runtime.tick(); await flush();
+    const result = w.store.get(child.id)!.result;
+    expect(result).toBe("x".repeat(prefixLength - 1) + "\n\n" + RESULT_TRUNCATED);
+    w.runtime.close(); w.store.close();
   });
   it("runs a child, reports it once, then wakes the root with the settled children in one resume turn", async () => {
     const w = world();
