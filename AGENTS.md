@@ -1,5 +1,11 @@
 # OpenMausBot agent notes
 
+This checkout maintains a personal fork alongside upstream OpenMausBot. Read
+[`docs/personal-fork-workflow.md`](docs/personal-fork-workflow.md) before
+merging upstream, packaging, installing, changing live data, or cleaning up
+another installation. Preserve local customizations and a verified rollback;
+never assume an upstream update or a successful build preserves either.
+
 Before claiming a server or conversation change works, follow
 [`docs/verification/README.md`](docs/verification/README.md). Always launch an
 isolated fixture; never verify mutations against the user's live app or data.
